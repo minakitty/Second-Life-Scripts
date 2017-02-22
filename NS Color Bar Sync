@@ -1,0 +1,45 @@
+// *********************************************************
+// Nanite Systems Color Bar Sync v 1.0
+// (c) 2017 Heather-Lynne Van Wilde
+// Under the GNU Affero GPL, V 3.0, 19-Nov-2007
+// https://www.gnu.org/licenses/agpl-3.0.en.html
+//
+// Script repository:
+// https://github.com/minakitty/Second-Life-Scripts
+//
+// Nanite Systems controllers are able to output their light
+// color using a 'light bus'.  This program is able to pick
+// up that information and apply it to any prims/faces you
+// choose, allowing you to color ears/wings/tails or whatever.
+//
+// NOTE: This system requires a Nanite Systems controller
+// In-world location: http://maps.secondlife.com/secondlife/Eisa/64/55/26
+// Marketplace: https://marketplace.secondlife.com/stores/175472
+//
+// Light bus channel calculations provided by NS Developers
+// website: http://develop.nanite-systems.com/?light_bus
+// *********************************************************
+
+integer channel_lights;
+integer listener;
+string str;
+
+default
+{
+    state_entry()
+    {
+        channel_lights = -1 - (integer)("0x" + llGetSubString( (string) llGetOwner(), -7, -1) ) + 106;
+        listener = llListen(channel_lights, "", NULL_KEY, ""); //listen on 'private key'
+    }
+    
+    listen (integer channel, string name, key id, string message)
+    {
+        //parse command from "color 0.000000 0.000000 0.000000" to RGB vector.  When done, then apply to prim.
+        if (llGetSubString(message, 0, 4) == "color")
+        {
+            str = "<" + llGetSubString(message, 6, 13) + ", " + llGetSubString(message, 15, 22) + ", " + llGetSubString(message, 24, 31) + ">";
+            //The following lines are modified to actually set the colors in the object.  Usually placing this script in the root prim and using llSetColor and llSetLinkColor commands will be sufficient (remember to use the face integer if you're trying to only change one portion of the prim, or ALL_SIDES if you're trying to change the entire prim).  The colors will apply on top of any texture that you have set on the prim, which may change the colors displayed.
+            llSetLinkColor(2, (vector)str, 0);
+        }
+    }
+}
