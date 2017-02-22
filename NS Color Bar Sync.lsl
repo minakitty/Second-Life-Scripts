@@ -7,10 +7,8 @@
    Script repository:
    https://github.com/minakitty/Second-Life-Scripts
   
-   Nanite Systems controllers are able to output their light
-   color using a 'light bus'.  This program is able to pick
-   up that information and apply it to any prims/faces you
-   choose, allowing you to color ears/wings/tails or whatever.
+   Nanite Systems controllers are able to output their light color using a 'light bus'.  This program is able to pick
+   up that information and apply it to any prims/faces you choose, allowing you to color ears/wings/tails or whatever.
   
    NOTE: This system requires a Nanite Systems controller
    In-world location: http://maps.secondlife.com/secondlife/Eisa/64/55/26
