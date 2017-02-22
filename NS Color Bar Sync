@@ -1,5 +1,5 @@
 // *********************************************************
-// Nanite Systems Color Bar Sync v 1.0
+// Nanite Systems Color Bar Sync v 1.1
 // (c) 2017 Heather-Lynne Van Wilde
 // Under the GNU Affero GPL, V 3.0, 19-Nov-2007
 // https://www.gnu.org/licenses/agpl-3.0.en.html
@@ -20,16 +20,33 @@
 // website: http://develop.nanite-systems.com/?light_bus
 // *********************************************************
 
+// Changelog
+// 1.1 - Corrected buggy parsing, added query on launch for initial color
+// 1.0 - Initial release
+
 integer channel_lights;
 integer listener;
-string str;
+list rgb;
+vector str;
+integer i; //used for applying the same setting to multiple prims of an object.  Comment out if not using
+list prims; //list cycled through using i.  Comment out if not using
 
 default
 {
-    state_entry()
+    on_rez(integer start_param)
     {
+        llListenRemove(listener);
         channel_lights = -1 - (integer)("0x" + llGetSubString( (string) llGetOwner(), -7, -1) ) + 106;
         listener = llListen(channel_lights, "", NULL_KEY, ""); //listen on 'private key'
+        llWhisper(channel_lights, "power-q"); //query controller for current color status, make certain we're synched to the current color on attach/login
+    }
+    
+    state_entry()
+    {
+        llListenRemove(listener);
+        channel_lights = -1 - (integer)("0x" + llGetSubString( (string) llGetOwner(), -7, -1) ) + 106;
+        listener = llListen(channel_lights, "", NULL_KEY, ""); //listen on 'private key'
+        llWhisper(channel_lights, "power-q");
     }
     
     listen (integer channel, string name, key id, string message)
@@ -37,9 +54,38 @@ default
         //parse command from "color 0.000000 0.000000 0.000000" to RGB vector.  When done, then apply to prim.
         if (llGetSubString(message, 0, 4) == "color")
         {
-            str = "<" + llGetSubString(message, 6, 13) + ", " + llGetSubString(message, 15, 22) + ", " + llGetSubString(message, 24, 31) + ">";
-            //The following lines are modified to actually set the colors in the object.  Usually placing this script in the root prim and using llSetColor and llSetLinkColor commands will be sufficient (remember to use the face integer if you're trying to only change one portion of the prim, or ALL_SIDES if you're trying to change the entire prim).  The colors will apply on top of any texture that you have set on the prim, which may change the colors displayed.
-            llSetLinkColor(2, (vector)str, 0);
+            list rgb = llParseString2List(llGetSubString(message, 6, -1), [" "], []);
+            str = <llList2Float(rgb, 0), llList2Float(rgb, 1), llList2Float(rgb, 2)>;
+            
+// The following lines are modified to actually set the colors in the object.
+// Usually placing this script in the root prim and using llSetcolor and llSetLinkColor
+// commands will be sufficient (remember to use the face integer if you're trying to
+// change one portion of the prim, or ALL_SIDES if you're trying to set the entire
+// prim).  The colors will apply on top of any texture that you have set on the prim,
+// which may change the colors displayed.
+//
+// For more technical information:
+// llSetColor: http://wiki.secondlife.com/wiki/LlSetColor
+// llSetLinkColor: http://wiki.secondlife.com/wiki/LlSetLinkColor
+// If you need help identifying the prim number in a link (Firestorm's Build menu seems
+// to fail at this), I have a tiny script that will report it's prim number, then
+// self-delete here: https://raw.githubusercontent.com/minakitty/Second-Life-Scripts/master/Prim%20Link%20Report
+
+            llSetLinkColor(2, str, 3);
+
+// If you have multiple prims in the linkset that have the same face number, you can use
+// a list and for statement to save code.  Comment out the code snippet below if you do
+// not need it.
+
+// Code snippet
+
+            prims = [13, 14, 15, 16, 17, 18, 19];
+            for(i = 0; i < llGetListLength(prims); ++i)
+                    {
+                        llSetLinkColor(llList2Integer(prims, i), str, 2);
+                    }
+                    
+// End code snippet
         }
     }
 }
