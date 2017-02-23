@@ -9,4 +9,6 @@ Sonja Redangel ( secondlife:///app/agent/940fdbbd-1549-48b9-a978-0a8e3d8da6d7/ab
 
 Heather Kincess ( secondlife:///app/agent/7d922e2e-e70e-4afd-a490-f45cda0c612f/about )
 
+Kotaisho ( secondlife:///app/agent/c80011d5-2f93-4355-a1c1-09eed3e3dd49/about )
+
 MaidHeather Trollop ( secondlife:///app/agent/0c87271c-bf67-4af3-8eaa-ed72a6121698/inspect )
