@@ -270,8 +270,8 @@ default
                     }
                     speechPost = speechPost + speechProc;
                 }
-                llSay(0, speechPost);
-
+                if (gRename ==3) llWhisper(0, speechPost);
+                else llSay(0, speechPost);
             }
         }
     }
