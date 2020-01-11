@@ -16,6 +16,11 @@
 // implementation)
 // *********************************************************
 
+//To-do list
+//Vision
+//Hearing
+//Private
+
 // Variables
 integer gRLVa; //Get RLVa validation (will be implemented when RLVa functions are added.  Minimum version needed v1.21)
 integer gRename; //Boolean for gag/renamer, defaults to 0 (0 = rename only, 1 = loose muffle, 2 = moderate muffle, 3 = severe muffle)
@@ -104,7 +109,21 @@ default
             }
             else if (message == "Vision") llOwnerSay("Feature not Implemented");
             else if (message == "Hearing") llOwnerSay("Feature not Implemented");
-            else if (message == "Lock") llOwnerSay("Feature not Implemented");
+            else if (message == "Lock")
+            {
+            	if (gLock == FALSE)
+            	{
+            		gLock = TRUE; //set TRUE
+            		llPlaySound("d9246d94-e26c-c848-4647-e504e8bc115c", 1.0);
+            		llOwnerSay("@detach=n");
+            	}
+            	else
+            	{
+            		gLock = FALSE;
+            		llPlaySound("8a7f31d5-01ee-45eb-4a55-e536b5151c5c", 1.0);
+            		llOwnerSay("@detach=y");
+            	}
+            }
             else if (message == "Private") llOwnerSay("Feature not Implemented");
             else if (message == "Reset")
             {
