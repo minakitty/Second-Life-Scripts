@@ -17,12 +17,11 @@
 // *********************************************************
 
 //To-do list
-//Vision
 //Hearing
 //Private
 
 // Variables
-integer gRLVa; //Get RLVa validation (will be implemented when RLVa functions are added.  Minimum version needed v1.21)
+integer gRLVa; //Get RLVa validation (will be implemented when RLVa functions are added.  Minimum version needed v2.9)
 integer gRename; //Boolean for gag/renamer, defaults to 0 (0 = rename only, 1 = loose muffle, 2 = moderate muffle, 3 = severe muffle)
 string sRename;    //Will pull renamer name from mask description when activated
 
@@ -86,7 +85,7 @@ default
     {
         if (channel == 18675309) //RLVa API check
         {
-            if ((integer)message >= 1210100) //RLVa API succeeds
+            if ((integer)message >= 2900000) //RLVa API succeeds
             {
                 gRLVa = TRUE;
                 llSetTimerEvent(0.0); //Kill the timeout
@@ -107,7 +106,28 @@ default
                 gRename++;
                    if (gRename == 4) gRename = 0; //if Gag was level 3, remove gag
             }
-            else if (message == "Vision") llOwnerSay("Feature not Implemented");
+            else if (message == "Vision")
+            {
+            	gLenses++;
+            		if (gLenses == 3) gLenses = 0; //if vision was already blocked, clear all
+            	if (gLenses == 0)
+            	{
+            		llSetAlpha(0.0, 1);
+            		//llOwnerSay("@camdrawmin:0.5=n,camdrawmax:3.0=n,camunlock=y,camavdist:1.0=y,showworldmap=y,showminimap=y,showloc=y,shownametags=y,showhovertextworld=y"); //shut down pending Firestorm updating API
+            		//version 1.16 compatable alternative
+            		llOwnerSay("@setdebug_renderresolutiondivisor:1=force,showworldmap=y,showminimap=y,showloc=y,shownametags=y,showhovertextworld=y");
+            	}
+            	else if (gLenses == 1)
+            	{
+            		llSetAlpha(1.0, 1);
+            	}
+            	else
+            	{
+            		//llOwnerSay("@camdrawmin:0.5=y,camdrawmax:3.0=y,camunlock=n,camavdist:1.0=n,showworldmap=n,showminimap=n,showloc=n,shownametags=n,showhovertextworld=n"); //shut down pending Firestorm updating API
+            		//version 1.16 compatable alternative
+            		llOwnerSay("@setdebug_renderresolutiondivisor:64=force,showworldmap=n,showminimap=n,showloc=n,shownametags=n,showhovertextworld=n");
+            	}
+            }
             else if (message == "Hearing") llOwnerSay("Feature not Implemented");
             else if (message == "Lock")
             {
