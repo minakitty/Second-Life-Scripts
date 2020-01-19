@@ -17,7 +17,6 @@
 // *********************************************************
 
 //To-do list
-//Hearing
 //Private
 
 // Variables
@@ -32,6 +31,8 @@ integer gHearing;
 integer gLock; //Boolean for lock, defaults to FALSE
 
 integer gPrivate; //Boolean for public access, defaults to TRUE (no public access)
+
+integer access_granted; //security check
 
 //llListen triggers
 integer listener;
@@ -71,10 +72,11 @@ default
         gRename = 0;
         sRename = llGetObjectDesc();
         gLenses = 0;
-        llSetAlpha(0.0, 1); //set lens to clear
+        llSetAlpha(0.1, 1); //set lens to clear
         // To-do, set blindness off
         gLock = FALSE;
         gPrivate = TRUE; 
+        gHearing = TRUE;
         //RLVa version checking
         ver_listener = llListen(18675309, "", llGetOwner(), "");
         llOwnerSay("@versionnum=18675309");
@@ -112,7 +114,7 @@ default
             		if (gLenses == 3) gLenses = 0; //if vision was already blocked, clear all
             	if (gLenses == 0)
             	{
-            		llSetAlpha(0.0, 1);
+            		llSetAlpha(0.1, 1);
             		//llOwnerSay("@camdrawmin:0.5=n,camdrawmax:3.0=n,camunlock=y,camavdist:1.0=y,showworldmap=y,showminimap=y,showloc=y,shownametags=y,showhovertextworld=y"); //shut down pending Firestorm updating API
             		//version 1.16 compatable alternative
             		llOwnerSay("@setdebug_renderresolutiondivisor:1=force,showworldmap=y,showminimap=y,showloc=y,shownametags=y,showhovertextworld=y");
@@ -128,7 +130,17 @@ default
             		llOwnerSay("@setdebug_renderresolutiondivisor:64=force,showworldmap=n,showminimap=n,showloc=n,shownametags=n,showhovertextworld=n");
             	}
             }
-            else if (message == "Hearing") llOwnerSay("Feature not Implemented");
+            else if (message == "Hearing")
+            	if (gHearing == TRUE)
+            	{
+            		gHearing = FALSE;
+            		llOwnerSay("@recvchat_sec=n,recvemote_sec=n");
+            	}
+            	else
+            	{
+            		gHearing = TRUE;
+            		llOwnerSay("@recvchat_sec=y,recvemote_sec=y");
+            	}
             else if (message == "Lock")
             {
             	if (gLock == FALSE)
@@ -144,7 +156,11 @@ default
             		llOwnerSay("@detach=y");
             	}
             }
-            else if (message == "Private") llOwnerSay("Feature not Implemented");
+            else if (message == "Private") 
+            {
+            	if (gPrivate == TRUE) gPrivate = FALSE;
+            	else gPrivate = TRUE;
+            }
             else if (message == "Reset")
             {
                 llOwnerSay("@clear");
@@ -159,8 +175,7 @@ default
 		    else if (gLenses == 1) statVision = "Mirrored Lens";
 		    else statVision = "Blinding Lens";
 
-		    if (gHearing == 0) statHearing = "Full Hearing";
-		    else if (gHearing == 1) statHearing = "Muffled Hearing";
+		    if (gHearing == TRUE) statHearing = "Full Hearing";
 		    else statHearing = "Deaf";
 
 		    if (gLock == FALSE) statLock = "Unlocked";
@@ -170,7 +185,7 @@ default
 		    else statPrivate = "Restricted to Wearer";
 
 		    dialogStat = "Current HUD status:\n Gag: " + statGag + "\n Vision: " + statVision + "\n Hearing: " + statHearing + "\n Lock: " + statLock + "\n Access: " + statPrivate;
-		    llDialog(llGetOwner(), dialogStat, dialogGrid, chanDialog);
+		    llDialog(llDetectedKey(0), dialogStat, dialogGrid, chanDialog);
         }
 
         else if (channel == 8675309) //Chat processing
@@ -287,26 +302,32 @@ default
 
     touch_start(integer total_number)
     {
-        if (gRename == 0) statGag = " ⊠  Not Gagged";
-	    else if (gRename == 1) statGag = "▁   Loose Gag";
-	    else if (gRename == 2) statGag = "▁▅  Snug Gag";
-	    else statGag = "▁▅▉ Tight Gag";
+    	access_granted = FALSE;
+    	if (gPrivate == TRUE && llDetectedKey(0) == llGetOwner()) access_granted = TRUE; // Private access and proper user
+    	else if (gPrivate == FALSE) access_granted = TRUE;
 
-	    if (gLenses == 0) statVision = "Unimpeded";
-	    else if (gLenses == 1) statVision = "Mirrored Lens";
-	    else statVision = "Blinding Lens";
+    	if (access_granted == TRUE)
+    	{
+	        if (gRename == 0) statGag = " ⊠  Not Gagged";
+		    else if (gRename == 1) statGag = "▁   Loose Gag";
+		    else if (gRename == 2) statGag = "▁▅  Snug Gag";
+		    else statGag = "▁▅▉ Tight Gag";
 
-	    if (gHearing == 0) statHearing = "Full Hearing";
-	    else if (gHearing == 1) statHearing = "Muffled Hearing";
-	    else statHearing = "Deaf";
+		    if (gLenses == 0) statVision = "Unimpeded";
+		    else if (gLenses == 1) statVision = "Mirrored Lens";
+		    else statVision = "Blinding Lens";
 
-	    if (gLock == FALSE) statLock = "Unlocked";
-	    else statLock = "Locked";
+		    if (gHearing == TRUE) statHearing = "Full Hearing";
+		    else statHearing = "Deaf";
 
-	    if (gPrivate == FALSE) statPrivate = "Open to Public";
-	    else statPrivate = "Restricted to Wearer";
+		    if (gLock == FALSE) statLock = "Unlocked";
+		    else statLock = "Locked";
 
-	    dialogStat = "Current HUD status:\n Gag: " + statGag + "\n Vision: " + statVision + "\n Hearing: " + statHearing + "\n Lock: " + statLock + "\n Access: " + statPrivate;
-	    llDialog(llGetOwner(), dialogStat, dialogGrid, chanDialog); 
+		    if (gPrivate == FALSE) statPrivate = "Open to Public";
+		    else statPrivate = "Restricted to Wearer";
+
+		    dialogStat = "Current HUD status:\n Gag: " + statGag + "\n Vision: " + statVision + "\n Hearing: " + statHearing + "\n Lock: " + statLock + "\n Access: " + statPrivate;
+		    llDialog(llDetectedKey(0), dialogStat, dialogGrid, chanDialog); 
+		}
    }
 }
